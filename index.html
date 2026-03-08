@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Special Gift For You</title>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Indie+Flower&display=swap" rel="stylesheet">
+    <title>Our Digital Album</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Indie+Flower&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-pink: #ff85a2;
+            --folder-color: #ffc1e3;
             --tape-color: rgba(255, 255, 255, 0.6);
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
-            /* Updated to Lover Gradient Background */
+            font-family: 'Quicksand', sans-serif;
             background: linear-gradient(135deg, #fce4ec 0%, #e1f5fe 50%, #f3e5f5 100%);
             background-attachment: fixed;
             margin: 0;
@@ -23,204 +23,155 @@
             min-height: 100vh;
         }
 
-        body.unlocked {
-            display: block;
-            padding: 20px 0;
-            overflow-x: hidden;
-        }
+        body.unlocked { display: block; padding: 20px 10px; }
 
+        /* --- LOGIN --- */
         #gatekeeper {
             text-align: center;
             background: white;
             padding: 2.5rem;
             border-radius: 20px;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 50px rgba(0,0,0,0.1);
             border: 6px double var(--primary-pink);
             max-width: 320px;
             width: 85%;
-            z-index: 9999;
         }
 
-        input[type="password"] {
-            padding: 12px;
-            border-radius: 10px;
-            border: 2px solid var(--primary-pink);
-            width: 80%;
-            margin-bottom: 1.5rem;
-            font-size: 16px;
-            text-align: center;
+        /* --- DASHBOARD --- */
+        #dashboard { display: none; max-width: 800px; margin: 0 auto; opacity: 0; transition: 1s; }
+
+        /* --- FOLDER GRID (GDRIVE STYLE) --- */
+        .folder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
         }
 
-        button {
-            background: var(--primary-pink);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-        }
-
-        #dashboard {
-            display: none; 
-            width: 95%;
-            max-width: 600px;
-            margin: 0 auto;
-            opacity: 0;
-            transition: opacity 1s ease;
-        }
-
-        /* --- NAVIGATION TABS --- */
-        .nav-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-            position: sticky;
-            top: 10px;
-            z-index: 1000;
-        }
-
-        .tab-btn {
+        .folder {
             background: white;
-            border: 2px solid var(--primary-pink);
-            color: var(--primary-pink);
-            padding: 10px 15px;
-            border-radius: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
             cursor: pointer;
-            font-family: 'Indie Flower', cursive;
-            font-weight: bold;
-            font-size: 1rem;
-            box-shadow: 3px 3px 0px var(--primary-pink);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 2px solid transparent;
             transition: 0.3s;
         }
 
-        .tab-btn.active {
-            background: var(--primary-pink);
-            color: white;
-            box-shadow: none;
-            transform: translateY(2px);
-        }
+        .folder:hover { border-color: var(--primary-pink); transform: translateY(-5px); }
+        .folder.active { background: var(--folder-color); color: white; }
 
-        /* --- SECTIONS --- */
-        .section-content {
-            display: none;
-        }
+        .folder-icon { font-size: 3rem; margin-bottom: 5px; }
+        .folder-name { font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        
+        .rename-btn { font-size: 0.7rem; cursor: pointer; opacity: 0.6; }
+        .rename-btn:hover { opacity: 1; }
 
-        .section-content.active {
-            display: block;
-        }
-
-        .card {
-            background: white;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+        /* --- MESSAGE SECTION WITH "READ MORE" --- */
+        .message-card {
+            background: #fffde7;
+            padding: 2rem;
+            border-left: 8px solid #ffd54f;
+            margin-bottom: 30px;
             position: relative;
         }
 
-        .card::before {
-            content: "";
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 120px;
-            height: 30px;
-            background: var(--tape-color);
-            border: 1px solid rgba(0,0,0,0.05);
+        .message-content {
+            font-family: 'Indie Flower', cursive;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            max-height: 80px; /* Only shows first few lines */
+            overflow: hidden;
+            transition: max-height 0.5s ease;
         }
 
-        h1, h3 { font-family: 'Dancing Script', cursive; color: var(--primary-pink); text-align: center; }
+        .message-content.expanded { max-height: 1000px; }
 
-        .polaroid-gallery {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
+        .read-more-btn {
+            background: none;
+            border: none;
+            color: var(--primary-pink);
+            font-weight: bold;
+            cursor: pointer;
             padding: 10px 0;
+            font-family: 'Quicksand', sans-serif;
         }
+
+        /* --- GALLERIES --- */
+        .gallery-view { display: none; animation: fadeIn 0.5s; }
+        .gallery-view.active { display: block; }
 
         .polaroid {
             background: white;
             padding: 15px 15px 40px 15px;
             width: 85%;
             max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            border: 1px solid #eee;
+            margin: 20px auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: rotate(-2deg);
         }
 
-        .polaroid img {
-            width: 100%;
-            display: block;
-        }
+        .polaroid img { width: 100%; display: block; }
 
-        /* Scatter effect */
-        .polaroid:nth-child(even) { transform: rotate(3deg); }
-        .polaroid:nth-child(odd) { transform: rotate(-3deg); }
-
-        .message-card {
-            background: #fffde7;
-            font-family: 'Indie Flower', cursive;
-            font-size: 1.3rem;
-            border-left: 8px solid #ffd54f;
-            padding: 2.5rem;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="gatekeeper">
-        <div style="font-size: 3rem; margin-bottom: 10px;">💌</div>
-        <h2 style="font-family: 'Dancing Script'; font-size: 2rem; color: var(--primary-pink);">A Letter for You</h2>
-        <input type="password" id="passInput" placeholder="Enter code...">
-        <button onclick="checkPassword()">Open Letter</button>
+        <h2 style="font-family: 'Dancing Script'; color: var(--primary-pink); font-size: 2rem;">Private Album</h2>
+        <input type="password" id="passInput" style="padding:10px; border-radius:10px; border:1px solid #ff85a2; margin-bottom:10px;" placeholder="Enter Secret Code">
+        <button onclick="checkPassword()" style="background:#ff85a2; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">Unlock</button>
     </div>
 
     <div id="dashboard">
-        <div class="nav-tabs">
-            <button class="tab-btn active" onclick="openSection(event, 'birthday')">Birthday</button>
-            <button class="tab-btn" onclick="openSection(event, 'monthsary')">Monthsary</button>
-            <button class="tab-btn" onclick="openSection(event, 'roblox')">Roblox</button>
+        <div class="message-card">
+            <h3 style="font-family: 'Dancing Script'; color: #fbc02d; margin-top:0;">A Special Message 💌</h3>
+            <div id="longMessage" class="message-content">
+                "Happy 29th Birthday to the love of my life! I’m so sorry that all I can give you right now is this greeting; I know I’ve been incredibly busy lately, but I want you to know how much I appreciate your constant understanding. Your kindness and patience mean the world to me.
+                <br><br>
+                It’s your birthday, yet I feel like I’m the one receiving the gift because having you in my life is the greatest present I could ever ask for. I know life will bring challenges, but I truly believe we can overcome anything together. I can’t wait to see you soon and hold you close. Happy Birthday, my baby!"
+            </div>
+            <button onclick="toggleMessage()" id="readBtn" class="read-more-btn">Read More ↓</button>
         </div>
 
-        <div id="birthday" class="section-content active">
-            <div class="card">
-                <h1 style="font-size: 2.5rem;">Happy Birthday, Ma vie! 🎉</h1>
-                <p style="font-family: 'Indie Flower'; text-align:center;">Today is all about you.</p>
+        <h3 style="font-family: 'Dancing Script';">My Drive</h3>
+        <div class="folder-grid">
+            <div class="folder" onclick="openFolder('birthday', this)">
+                <div class="folder-icon">📁</div>
+                <div class="folder-name"><span id="name-birthday">Birthday</span> <span class="rename-btn" onclick="renameFolder(event, 'birthday')">✏️</span></div>
             </div>
-            <div class="polaroid-gallery">
-                <div class="polaroid"><img src="https://i.imgur.com/kmXZdMD.png"></div>
+            <div class="folder" onclick="openFolder('monthsary', this)">
+                <div class="folder-icon">📁</div>
+                <div class="folder-name"><span id="name-monthsary">Monthsary</span> <span class="rename-btn" onclick="renameFolder(event, 'monthsary')">✏️</span></div>
             </div>
-            <div class="card message-card">
-                <h3>A Special Message 💌</h3>
-                <p>"Happy 29th Birthday! I know I’ve been busy, but you are always in my heart. You are my greatest gift."</p>
-            </div>
-        </div>
-
-        <div id="monthsary" class="section-content">
-            <div class="card">
-                <h1>Our Monthsary 💖</h1>
-                <p style="font-family: 'Indie Flower'; text-align:center;">Every month is a new favorite chapter.</p>
-            </div>
-            <div class="polaroid-gallery">
-                <div class="polaroid"><img src="https://i.imgur.com/YNpKxsc.png"></div>
+            <div class="folder" onclick="openFolder('roblox', this)">
+                <div class="folder-icon">📁</div>
+                <div class="folder-name"><span id="name-roblox">Roblox</span> <span class="rename-btn" onclick="renameFolder(event, 'roblox')">✏️</span></div>
             </div>
         </div>
 
-        <div id="roblox" class="section-content">
-            <div class="card">
-                <h1>Roblox Adventures 🎮</h1>
-                <p style="font-family: 'Indie Flower'; text-align:center;">Our digital world memories.</p>
-            </div>
-            <div class="polaroid-gallery">
-                <div class="polaroid"><img src="https://i.imgur.com/Y8xLDuq.png"></div>
-            </div>
+        <hr style="border: 0; border-top: 1px dashed var(--primary-pink); margin: 30px 0;">
+
+        <div id="birthday" class="gallery-view">
+            <h2 style="font-family: 'Dancing Script';">Birthday Memories</h2>
+            <div class="polaroid"><img src="https://i.imgur.com/kmXZdMD.png"></div>
+        </div>
+
+        <div id="monthsary" class="gallery-view">
+            <h2 style="font-family: 'Dancing Script';">Our Monthsaries</h2>
+            <div class="polaroid"><img src="https://i.imgur.com/YNpKxsc.png"></div>
+        </div>
+
+        <div id="roblox" class="gallery-view">
+            <h2 style="font-family: 'Dancing Script';">Roblox Fun</h2>
+            <div class="polaroid"><img src="https://i.imgur.com/Y8xLDuq.png"></div>
         </div>
     </div>
 
     <script>
+        // --- LOGIN LOGIC ---
         function checkPassword() {
             const secret = "022797"; 
             const input = document.getElementById('passInput').value;
@@ -230,23 +181,48 @@
                 document.getElementById('dashboard').style.display = 'block';
                 setTimeout(() => { document.getElementById('dashboard').style.opacity = '1'; }, 50);
             } else {
-                alert("Try again, my love!");
+                alert("Wrong code, lover!");
             }
         }
 
-        function openSection(evt, sectionName) {
-            var i, content, tabs;
-            content = document.getElementsByClassName("section-content");
-            for (i = 0; i < content.length; i++) {
-                content[i].classList.remove("active");
+        // --- MESSAGE TOGGLE ---
+        function toggleMessage() {
+            const msg = document.getElementById('longMessage');
+            const btn = document.getElementById('readBtn');
+            if (msg.classList.contains('expanded')) {
+                msg.classList.remove('expanded');
+                btn.innerText = "Read More ↓";
+            } else {
+                msg.classList.add('expanded');
+                btn.innerText = "Show Less ↑";
             }
-            tabs = document.getElementsByClassName("tab-btn");
-            for (i = 0; i < tabs.length; i++) {
-                tabs[i].classList.remove("active");
+        }
+
+        // --- FOLDER SYSTEM ---
+        function openFolder(folderId, element) {
+            // Reset active folder style
+            const folders = document.querySelectorAll('.folder');
+            folders.forEach(f => f.classList.remove('active'));
+            element.classList.add('active');
+
+            // Reset gallery visibility
+            const galleries = document.querySelectorAll('.gallery-view');
+            galleries.forEach(g => g.classList.remove('active'));
+
+            // Show selected gallery
+            document.getElementById(folderId).classList.add('active');
+            
+            // Scroll down to the gallery
+            document.getElementById(folderId).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- RENAME FEATURE ---
+        function renameFolder(event, id) {
+            event.stopPropagation(); // Prevents the folder from opening when clicking edit
+            const newName = prompt("Rename this album to:");
+            if (newName) {
+                document.getElementById('name-' + id).innerText = newName;
             }
-            document.getElementById(sectionName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-            window.scrollTo(0,0);
         }
     </script>
 </body>
