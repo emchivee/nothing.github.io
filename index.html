@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Special Gift For You</title>
+    <title>Our Memory Drive</title>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Indie+Flower&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-pink: #ff85a2;
-            --soft-blue: #e1f5fe;
             --folder-bg: rgba(255, 255, 255, 0.7);
-            --tape-color: rgba(255, 255, 255, 0.6);
         }
 
         body {
@@ -24,237 +22,163 @@
             min-height: 100vh;
         }
 
-        /* Layout fix for after login */
-        body.unlocked {
-            display: block;
-            padding: 20px 10px;
-            overflow-x: hidden;
-        }
+        body.unlocked { display: block; padding: 20px 10px; }
 
-        /* --- ORIGINAL ROMANTIC LOGIN BOX --- */
+        /* --- LOGIN BOX --- */
         #gatekeeper {
-            text-align: center;
-            background: white;
-            padding: 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.2);
-            border: 6px double var(--primary-pink);
-            max-width: 320px;
-            width: 85%;
-            z-index: 9999;
+            text-align: center; background: white; padding: 2.5rem; border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.2); border: 6px double var(--primary-pink);
+            max-width: 320px; width: 85%; z-index: 9999;
         }
 
         input[type="password"] {
-            padding: 12px;
-            border-radius: 10px;
-            border: 2px solid var(--primary-pink);
-            width: 80%;
-            margin-bottom: 1.5rem;
-            font-size: 16px;
-            text-align: center;
-            outline: none;
-        }
-
-        button.unlock-btn {
-            background: var(--primary-pink);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
+            padding: 12px; border-radius: 10px; border: 2px solid var(--primary-pink);
+            width: 80%; margin-bottom: 1.5rem; text-align: center;
         }
 
         /* --- DASHBOARD --- */
-        #dashboard { 
-            display: none; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            opacity: 0; 
-            transition: opacity 1s ease; 
-        }
+        #dashboard { display: none; max-width: 800px; margin: 0 auto; opacity: 0; transition: 1s; }
 
-        /* --- MEMORIES FOLDER GRID --- */
         .folder-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px; margin-bottom: 30px;
         }
 
         .folder {
-            background: var(--folder-bg);
-            backdrop-filter: blur(5px);
-            padding: 20px 10px;
-            border-radius: 15px;
-            text-align: center;
-            cursor: pointer;
-            border: 2px solid white;
-            transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: var(--folder-bg); padding: 15px 5px; border-radius: 15px;
+            text-align: center; cursor: pointer; border: 2px solid white; transition: 0.3s;
         }
 
-        .folder:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-pink);
-            background: white;
+        .folder.active { background: var(--primary-pink); color: white; border-color: var(--primary-pink); }
+        .folder-icon { font-size: 2rem; }
+        .folder-name { font-size: 0.8rem; font-weight: 600; }
+
+        /* --- UPLOAD SECTION --- */
+        .upload-controls {
+            text-align: center; margin-bottom: 30px; background: rgba(255,255,255,0.4);
+            padding: 15px; border-radius: 15px; border: 1px dashed var(--primary-pink);
         }
 
-        .folder.active {
-            background: var(--primary-pink);
-            color: white;
+        .custom-file-upload {
+            background: white; color: var(--primary-pink); border: 2px solid var(--primary-pink);
+            padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; display: inline-block;
         }
 
-        .folder-icon { font-size: 2.5rem; margin-bottom: 8px; }
-        .folder-name { font-weight: 600; font-family: 'Quicksand', sans-serif; font-size: 0.9rem; color: #444; }
-        .folder.active .folder-name { color: white; }
-
-        /* --- MESSAGE BOX (Inside Birthday) --- */
-        .message-card {
-            background: #fffde7;
-            padding: 1.5rem;
-            border-left: 8px solid #ffd54f;
-            margin-bottom: 25px;
-            position: relative;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.05);
-        }
-
-        .message-content {
-            font-family: 'Indie Flower', cursive;
-            font-size: 1.2rem;
-            line-height: 1.5;
-            max-height: 70px; 
-            overflow: hidden;
-            transition: max-height 0.6s ease;
-        }
-
-        .message-content.expanded { max-height: 1200px; }
-
-        .read-more-btn {
-            background: none;
-            border: none;
-            color: var(--primary-pink);
-            font-weight: bold;
-            cursor: pointer;
-            padding-top: 10px;
-            font-size: 0.9rem;
-        }
-
-        /* --- PHOTO ALBUM VIEW --- */
+        /* --- ALBUMS --- */
         .album-view { display: none; }
-        .album-view.active { display: block; animation: fadeIn 0.8s; }
+        .album-view.active { display: block; animation: fadeIn 0.5s; }
+
+        .photo-container {
+            display: flex; flex-direction: column; align-items: center; gap: 20px;
+        }
 
         .polaroid {
-            background: white;
-            padding: 15px 15px 45px 15px;
-            width: 85%;
-            max-width: 380px;
-            margin: 25px auto;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border: 1px solid #eee;
+            background: white; padding: 15px 15px 40px 15px; width: 80%; max-width: 350px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); border: 1px solid #eee;
         }
 
         .polaroid img { width: 100%; display: block; }
-        .polaroid:nth-child(even) { transform: rotate(3deg); }
-        .polaroid:nth-child(odd) { transform: rotate(-3deg); }
+        .polaroid:nth-child(even) { transform: rotate(2deg); }
+        .polaroid:nth-child(odd) { transform: rotate(-2deg); }
 
-        h1, h2, h3 { font-family: 'Dancing Script', cursive; color: var(--primary-pink); text-align: center; }
+        /* --- MESSAGE --- */
+        .message-card {
+            background: #fffde7; padding: 1.5rem; border-left: 8px solid #ffd54f;
+            margin-bottom: 25px; font-family: 'Indie Flower', cursive;
+        }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        h2 { font-family: 'Dancing Script', cursive; color: var(--primary-pink); text-align: center; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="gatekeeper">
-        <div style="font-size: 3rem; margin-bottom: 10px;">💌</div>
-        <h2 style="font-family: 'Dancing Script'; font-size: 2rem; color: var(--primary-pink); margin-top:0;">For My Love</h2>
-        <p style="font-size: 0.9rem; color: #777; margin-bottom: 20px;">Enter our special date to open:</p>
+        <h2 style="margin-top:0">For My Love</h2>
         <input type="password" id="passInput" placeholder="MMDDYY">
-        <button class="unlock-btn" onclick="checkPassword()">Open Letter</button>
+        <button onclick="checkPassword()" style="background:var(--primary-pink); color:white; border:none; padding:15px; border-radius:10px; width:100%; cursor:pointer;">Open Letter</button>
     </div>
 
     <div id="dashboard">
-        <h2 style="font-size: 2.5rem; margin-bottom: 5px;">Memories</h2>
-        <p style="text-align: center; color: #888; margin-top: 0; font-family: 'Indie Flower';">Our shared moments, safely stored.</p>
+        <h2>Memories</h2>
         
         <div class="folder-grid">
             <div class="folder active" onclick="openAlbum('birthday', this)">
-                <div class="folder-icon">🌸</div>
-                <div class="folder-name" id="name-birthday">Birthday</div>
+                <div class="folder-icon">🌸</div><div class="folder-name">Birthday</div>
             </div>
             <div class="folder" onclick="openAlbum('monthsary', this)">
-                <div class="folder-icon">💖</div>
-                <div class="folder-name" id="name-monthsary">Monthsary</div>
+                <div class="folder-icon">💖</div><div class="folder-name">Monthsary</div>
             </div>
             <div class="folder" onclick="openAlbum('roblox', this)">
-                <div class="folder-icon">🎮</div>
-                <div class="folder-name" id="name-roblox">Roblox</div>
+                <div class="folder-icon">🎮</div><div class="folder-name">Roblox</div>
             </div>
         </div>
 
-        <hr style="border:0; border-top: 1px dashed #ffb2c5; margin: 30px 0;">
+        <div class="upload-controls">
+            <p style="margin-top:0; font-size: 0.8rem; color: #666;">Add a new photo to the current folder:</p>
+            <label class="custom-file-upload">
+                <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleUpload(this)">
+                ✨ Upload Photo
+            </label>
+        </div>
 
         <div id="birthday" class="album-view active">
             <div class="message-card">
-                <h3 style="text-align: left; margin: 0 0 10px 0; color: #fbc02d;">A Note for You 💌</h3>
-                <div id="longMsg" class="message-content">
-                    "Happy 29th Birthday to the love of my life! I’m so sorry that all I can give you right now is this greeting; I know I’ve been incredibly busy lately, but I want you to know how much I appreciate your constant understanding. Your kindness and patience mean the world to me.
-                    <br><br>
-                    It’s your birthday, yet I feel like I’m the one receiving the gift because having you in my life is the greatest present I could ever ask for. I know life will bring challenges, but I truly believe we can overcome anything together. I can’t wait to see you soon and hold you close. Happy Birthday, my baby!"
-                </div>
-                <button onclick="toggleMsg()" id="readBtn" class="read-more-btn">Read full message ↓</button>
+                <h3 style="margin-top:0; color:#fbc02d; font-family:'Dancing Script'">A Note for You 💌</h3>
+                "Happy 29th Birthday to the love of my life! I’m so sorry that all I can give you right now is this greeting... I can’t wait to see you soon and hold you close."
             </div>
-
-            <h2>Birthday Highlights</h2>
-            <div class="polaroid"><img src="https://i.imgur.com/kmXZdMD.png"></div>
+            <div class="photo-container" id="container-birthday">
+                <div class="polaroid"><img src="https://i.imgur.com/kmXZdMD.png"></div>
+            </div>
         </div>
 
         <div id="monthsary" class="album-view">
-            <h2>Our Chapters</h2>
-            <div class="polaroid"><img src="https://i.imgur.com/YNpKxsc.png"></div>
+            <div class="photo-container" id="container-monthsary">
+                <div class="polaroid"><img src="https://i.imgur.com/YNpKxsc.png"></div>
+            </div>
         </div>
 
         <div id="roblox" class="album-view">
-            <h2>Game Days</h2>
-            <div class="polaroid"><img src="https://i.imgur.com/Y8xLDuq.png"></div>
+            <div class="photo-container" id="container-roblox">
+                <div class="polaroid"><img src="https://i.imgur.com/Y8xLDuq.png"></div>
+            </div>
         </div>
     </div>
 
     <script>
+        let currentFolder = 'birthday';
+
         function checkPassword() {
-            const secret = "022797"; 
-            const input = document.getElementById('passInput').value;
-            if (input.trim() === secret) {
+            if (document.getElementById('passInput').value === "022797") {
                 document.body.classList.add('unlocked');
                 document.getElementById('gatekeeper').remove();
                 document.getElementById('dashboard').style.display = 'block';
                 setTimeout(() => { document.getElementById('dashboard').style.opacity = '1'; }, 50);
-                window.scrollTo(0,0);
-            } else {
-                alert("Try again, my love! ❤️");
-            }
+            } else { alert("Try again, love!"); }
         }
 
-        function openAlbum(albumId, btn) {
-            // Update folder styles
+        function openAlbum(id, btn) {
+            currentFolder = id;
             document.querySelectorAll('.folder').forEach(f => f.classList.remove('active'));
             btn.classList.add('active');
-
-            // Switch album visibility
             document.querySelectorAll('.album-view').forEach(v => v.classList.remove('active'));
-            document.getElementById(albumId).classList.add('active');
+            document.getElementById(id).classList.add('active');
         }
 
-        function toggleMsg() {
-            const msg = document.getElementById('longMsg');
-            const btn = document.getElementById('readBtn');
-            if (msg.classList.contains('expanded')) {
-                msg.classList.remove('expanded');
-                btn.innerText = "Read full message ↓";
-            } else {
-                msg.classList.add('expanded');
-                btn.innerText = "Show less ↑";
+        // THE UPLOAD LOGIC
+        function handleUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const container = document.getElementById('container-' + currentFolder);
+                    const newPolaroid = document.createElement('div');
+                    newPolaroid.className = 'polaroid';
+                    newPolaroid.innerHTML = `<img src="${e.target.result}">`;
+                    // Adds the new photo to the TOP of the album
+                    container.prepend(newPolaroid);
+                };
+                reader.readAsDataURL(input.files[0]);
             }
         }
     </script>
