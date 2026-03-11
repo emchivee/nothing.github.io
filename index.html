@@ -47,11 +47,15 @@
         .folder {
             background: var(--folder-bg); padding: 15px 5px; border-radius: 15px;
             text-align: center; cursor: pointer; border: 2px solid white; transition: 0.3s;
+            position: relative;
         }
 
         .folder.active { background: var(--primary-pink); color: white; border-color: var(--primary-pink); }
         .folder-icon { font-size: 2rem; }
-        .folder-name { font-size: 0.8rem; font-weight: 600; }
+        .folder-name { font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        
+        .rename-icon { font-size: 0.7rem; opacity: 0.5; cursor: pointer; }
+        .folder.active .rename-icon { filter: brightness(0) invert(1); }
 
         /* --- UPLOAD SECTION --- */
         .upload-controls {
@@ -87,6 +91,19 @@
             margin-bottom: 25px; font-family: 'Indie Flower', cursive;
         }
 
+        .message-text {
+            max-height: 4.5em; overflow: hidden; transition: max-height 0.5s ease;
+            line-height: 1.5; font-size: 1.2rem;
+        }
+
+        .message-text.expanded { max-height: 1000px; }
+
+        .read-more-btn {
+            background: none; border: none; color: var(--primary-pink);
+            font-family: 'Quicksand', sans-serif; font-weight: bold;
+            cursor: pointer; padding: 5px 0; margin-top: 10px;
+        }
+
         h2 { font-family: 'Dancing Script', cursive; color: var(--primary-pink); text-align: center; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -105,13 +122,25 @@
         
         <div class="folder-grid">
             <div class="folder active" onclick="openAlbum('birthday', this)">
-                <div class="folder-icon">🌸</div><div class="folder-name">Birthday</div>
+                <div class="folder-icon">🌸</div>
+                <div class="folder-name">
+                    <span id="title-birthday">Birthday</span>
+                    <span class="rename-icon" onclick="renameFolder(event, 'birthday')">✏️</span>
+                </div>
             </div>
             <div class="folder" onclick="openAlbum('monthsary', this)">
-                <div class="folder-icon">💖</div><div class="folder-name">Monthsary</div>
+                <div class="folder-icon">💖</div>
+                <div class="folder-name">
+                    <span id="title-monthsary">Monthsary</span>
+                    <span class="rename-icon" onclick="renameFolder(event, 'monthsary')">✏️</span>
+                </div>
             </div>
             <div class="folder" onclick="openAlbum('roblox', this)">
-                <div class="folder-icon">🎮</div><div class="folder-name">Roblox</div>
+                <div class="folder-icon">🎮</div>
+                <div class="folder-name">
+                    <span id="title-roblox">Roblox</span>
+                    <span class="rename-icon" onclick="renameFolder(event, 'roblox')">✏️</span>
+                </div>
             </div>
         </div>
 
@@ -126,7 +155,11 @@
         <div id="birthday" class="album-view active">
             <div class="message-card">
                 <h3 style="margin-top:0; color:#fbc02d; font-family:'Dancing Script'">A Note for You 💌</h3>
-                "Happy 29th Birthday to the love of my life! I’m so sorry that all I can give you right now is this greeting... I can’t wait to see you soon and hold you close."
+                <div id="msgText" class="message-text">
+                    "Happy 29th Birthday to the love of my life! I’m so sorry that all I can give you right now is this greeting; I know I’ve been incredibly busy lately, but I want you to know how much I appreciate your constant understanding. Your kindness and patience mean the world to me.<br><br>
+                    It’s your birthday, yet I feel like I’m the one receiving the gift because having you in my life is the greatest present I could ever ask for. I know life will bring challenges, but I truly believe we can overcome anything together. I can’t wait to see you soon and hold you close. Happy Birthday, my baby!"
+                </div>
+                <button onclick="toggleMessage()" id="toggleBtn" class="read-more-btn">Read More ↓</button>
             </div>
             <div class="photo-container" id="container-birthday">
                 <div class="polaroid"><img src="https://i.imgur.com/kmXZdMD.png"></div>
@@ -166,7 +199,26 @@
             document.getElementById(id).classList.add('active');
         }
 
-        // THE UPLOAD LOGIC
+        function renameFolder(event, id) {
+            event.stopPropagation(); // Prevents opening the folder when clicking rename
+            const newName = prompt("Enter a new name for this folder:");
+            if (newName) {
+                document.getElementById('title-' + id).innerText = newName;
+            }
+        }
+
+        function toggleMessage() {
+            const text = document.getElementById('msgText');
+            const btn = document.getElementById('toggleBtn');
+            if (text.classList.contains('expanded')) {
+                text.classList.remove('expanded');
+                btn.innerText = "Read More ↓";
+            } else {
+                text.classList.add('expanded');
+                btn.innerText = "Show Less ↑";
+            }
+        }
+
         function handleUpload(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -175,7 +227,6 @@
                     const newPolaroid = document.createElement('div');
                     newPolaroid.className = 'polaroid';
                     newPolaroid.innerHTML = `<img src="${e.target.result}">`;
-                    // Adds the new photo to the TOP of the album
                     container.prepend(newPolaroid);
                 };
                 reader.readAsDataURL(input.files[0]);
