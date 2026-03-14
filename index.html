@@ -9,181 +9,147 @@
         :root {
             --primary-pink: #ff85a2;
             --soft-pink: #fff0f3;
-            --folder-bg: rgba(255, 255, 255, 0.8);
+            --glass: rgba(255, 255, 255, 0.8);
+            --folder-color: #ffb3c6;
+            --delete-red: #ff5e5e;
         }
 
         body {
             font-family: 'Quicksand', sans-serif;
             background: linear-gradient(135deg, #fce4ec 0%, #e1f5fe 50%, #f3e5f5 100%);
             background-attachment: fixed;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
+            margin: 0; padding: 0;
+            display: flex; justify-content: center; min-height: 100vh;
         }
 
-        /* --- LOGIN BOX --- */
         #gatekeeper {
-            align-self: center;
-            text-align: center; background: white; padding: 2.5rem; border-radius: 20px;
+            align-self: center; text-align: center; background: white; padding: 2.5rem; border-radius: 20px;
             box-shadow: 0 10px 50px rgba(0,0,0,0.1); border: 6px double var(--primary-pink);
             max-width: 350px; width: 90%;
         }
 
-        input[type="password"] {
-            padding: 12px; border-radius: 10px; border: 2px solid var(--primary-pink);
-            width: 80%; margin-bottom: 1.5rem; text-align: center; font-size: 1rem;
-        }
-
-        /* --- DASHBOARD (Full Width) --- */
         #dashboard { 
-            display: none; 
-            width: 100%; 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 40px 20px;
-            box-sizing: border-box;
-            opacity: 0; transition: 1s; 
+            display: none; width: 100%; max-width: 1200px; margin: 0 auto; 
+            padding: 40px 20px; box-sizing: border-box; opacity: 0; transition: 1s; 
         }
 
-        .folder-grid {
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 20px; margin-bottom: 40px;
+        .main-nav {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 15px; margin-bottom: 40px;
         }
 
-        .folder {
-            background: var(--folder-bg); padding: 20px 10px; border-radius: 20px;
+        .nav-item {
+            background: var(--glass); padding: 15px; border-radius: 15px;
             text-align: center; cursor: pointer; border: 2px solid white; transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        .folder:hover { transform: translateY(-5px); }
-        .folder.active { background: var(--primary-pink); color: white; border-color: var(--primary-pink); }
-        .folder-icon { font-size: 2.5rem; margin-bottom: 5px; }
-        .folder-name { font-size: 0.9rem; font-weight: 600; }
+        .nav-item.active { background: var(--primary-pink); color: white; border-color: var(--primary-pink); }
 
-        /* --- UPLOAD SECTION --- */
+        .sub-folder-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px; margin-top: 20px; padding: 20px;
+            background: rgba(255,255,255,0.3); border-radius: 20px;
+        }
+
+        /* --- UPDATED FOLDER STYLE WITH DELETE --- */
+        .sub-folder {
+            background: white; padding: 15px; border-radius: 12px;
+            text-align: center; cursor: pointer; border-bottom: 4px solid var(--folder-color);
+            transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .delete-btn {
+            position: absolute; top: 5px; right: 5px;
+            background: var(--delete-red); color: white; border: none;
+            border-radius: 50%; width: 20px; height: 20px; font-size: 12px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            opacity: 0.6; transition: 0.3s; z-index: 10;
+        }
+        .delete-btn:hover { opacity: 1; transform: scale(1.1); }
+
         .upload-controls {
             text-align: center; margin-bottom: 40px; background: white;
-            padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
         .btn {
             background: white; color: var(--primary-pink); border: 2px solid var(--primary-pink);
-            padding: 12px 25px; border-radius: 30px; cursor: pointer; font-weight: bold; 
+            padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: bold; 
             font-family: 'Quicksand', sans-serif; margin: 5px; transition: 0.3s;
         }
 
         .btn:hover { background: var(--primary-pink); color: white; }
 
-        #messageInput {
-            width: 100%; max-width: 600px; height: 80px; padding: 15px; border-radius: 15px; 
-            border: 1px solid #ddd; margin-bottom: 15px; outline: none;
-            font-family: 'Quicksand', sans-serif; font-size: 1rem;
+        textarea {
+            width: 100%; max-width: 600px; height: 60px; padding: 12px; border-radius: 12px; 
+            border: 1px solid #ddd; margin-bottom: 10px; outline: none; font-family: inherit;
         }
 
-        /* --- CONTENT AREA --- */
-        .album-view { display: none; }
-        .album-view.active { display: block; animation: fadeIn 0.5s; }
-        
         .photo-container { 
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
-            justify-items: center;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px; justify-items: center; margin-top: 30px;
         }
 
-        /* --- POLAROID STYLE --- */
+        /* --- UPDATED POST STYLE WITH DELETE --- */
         .polaroid {
-            background: white; padding: 15px 15px 20px 15px; width: 100%; max-width: 320px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08); border-radius: 2px;
-            transition: 0.3s;
+            background: white; padding: 12px 12px 18px 12px; width: 100%; max-width: 300px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-radius: 2px; position: relative;
         }
 
-        .polaroid img { width: 100%; height: auto; display: block; border-radius: 2px; }
-        .caption { 
-            font-family: 'Indie Flower', cursive; text-align: center; 
-            margin-top: 20px; font-size: 1.4rem; color: #444; 
-        }
-
-        /* --- NEW MESSAGE STYLE (No more yellow) --- */
         .note {
-            background: white; padding: 30px; width: 100%; max-width: 350px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-radius: 20px;
-            border-top: 5px solid var(--primary-pink);
-            font-family: 'Quicksand', sans-serif; font-size: 1.1rem; 
-            color: #555; line-height: 1.6; text-align: left;
-            position: relative; overflow: hidden;
+            background: white; padding: 25px; width: 100%; max-width: 320px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05); border-radius: 15px;
+            border-left: 5px solid var(--primary-pink); color: #444; line-height: 1.5;
+            position: relative;
         }
 
-        .note::after {
-            content: '💌'; position: absolute; bottom: 10px; right: 10px; opacity: 0.3; font-size: 1.5rem;
-        }
+        h2 { font-family: 'Dancing Script', cursive; color: var(--primary-pink); text-align: center; font-size: 2.5rem; }
+        h3 { color: var(--primary-pink); text-align: center; font-size: 1.2rem; margin-top: 0; }
+        .hidden { display: none !important; }
 
-        h2 { font-family: 'Dancing Script', cursive; color: var(--primary-pink); text-align: center; font-size: 3rem; margin-bottom: 30px; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Tablet/Mobile sizing */
-        @media (max-width: 600px) {
-            h2 { font-size: 2rem; }
-            .folder-grid { grid-template-columns: repeat(3, 1fr); }
-            .folder-icon { font-size: 1.5rem; }
-        }
     </style>
 </head>
 <body>
 
     <div id="gatekeeper">
-        <h2 style="margin-top:0; font-size: 2rem;">For My Love</h2>
+        <h2 style="margin-top:0">For My Love</h2>
         <input type="password" id="passInput" placeholder="Enter Password">
         <button onclick="checkPassword()" class="btn" style="background:var(--primary-pink); color:white; width:100%">Open Memory Drive</button>
     </div>
 
     <div id="dashboard">
-        <h2>Our Memory Drive</h2>
+        <h2 id="mainTitle">Our Memory Drive</h2>
         
-        <div class="folder-grid" id="folderGrid">
-            <div class="folder active" onclick="openAlbum('birthday', this)"><div class="folder-icon">🎂</div><div class="folder-name">Birthday</div></div>
-            <div class="folder" onclick="openAlbum('monthsary', this)"><div class="folder-icon">💖</div><div class="folder-name">Monthsary</div></div>
-            <div class="folder" onclick="openAlbum('everyday', this)"><div class="folder-icon">☀️</div><div class="folder-name">Everyday</div></div>
-            <div class="folder" onclick="openAlbum('schedules', this)"><div class="folder-icon">📅</div><div class="folder-name">Schedules</div></div>
-            <div class="folder" onclick="openAlbum('roblox', this)"><div class="folder-icon">🎮</div><div class="folder-name">Roblox</div></div>
+        <div class="main-nav">
+            <div class="nav-item active" onclick="changeSection('birthday', this)">🎂 Birthday</div>
+            <div class="nav-item" onclick="changeSection('monthsary', this)">💖 Monthsary</div>
+            <div class="nav-item" onclick="changeSection('everyday', this)">☀️ Everyday</div>
+            <div class="nav-item" onclick="changeSection('schedules', this)">📅 Schedules</div>
+            <div class="nav-item" onclick="changeSection('roblox', this)">🎮 Roblox</div>
         </div>
 
         <div class="upload-controls">
-            <textarea id="messageInput" placeholder="Write something sweet or a schedule..."></textarea><br>
-            <button class="btn" onclick="postMessage()">📝 Post Message</button>
+            <h3 id="currentLocationText">Inside: Birthday</h3>
+            <textarea id="messageInput" placeholder="Post a message or schedule..."></textarea><br>
+            <button class="btn" onclick="postMessage()">📝 Post Text</button>
             <label class="btn">
                 <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleUpload(this)">
                 ✨ Upload Photo
             </label>
-            <button class="btn" style="border-color:#ccc; color:#999" onclick="addNewFolder()">+ New Folder</button>
+            <button class="btn" onclick="createNewSubFolder()" style="border-style: dashed;">📁 + New Sub-Folder</button>
         </div>
 
-        <div id="albumContainers">
-            <div id="birthday" class="album-view active"><div class="photo-container" id="container-birthday"></div></div>
-            <div id="monthsary" class="album-view"><div class="photo-container" id="container-monthsary"></div></div>
-            <div id="everyday" class="album-view"><div class="photo-container" id="container-everyday"></div></div>
-            <div id="schedules" class="album-view"><div class="photo-container" id="container-schedules"></div></div>
-            <div id="roblox" class="album-view"><div class="photo-container" id="container-roblox"></div></div>
-        </div>
+        <button id="backBtn" class="btn hidden" onclick="exitSubFolder()" style="margin-bottom:20px;">← Back to Main</button>
 
-        <p style="text-align:center; margin-top:50px; color:#bbb; font-size:0.8rem;">
-            Note: Photos are saved locally to this device/browser.
-        </p>
+        <div id="subFolderArea" class="sub-folder-grid"></div>
+        <div id="contentArea" class="photo-container"></div>
     </div>
 
     <script>
-        let currentFolder = 'birthday';
-
-        window.onload = function() {
-            if (localStorage.getItem('isLoggedIn') === 'true') showDashboard();
-            loadCustomFolders();
-            loadMemories();
-        };
+        let currentSection = 'birthday';
+        let currentSubFolder = null;
 
         function checkPassword() {
             if (document.getElementById('passInput').value === "022797") {
@@ -196,38 +162,111 @@
             document.getElementById('gatekeeper').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             setTimeout(() => document.getElementById('dashboard').style.opacity = '1', 50);
+            render();
         }
 
-        function openAlbum(id, btn) {
-            currentFolder = id;
-            document.querySelectorAll('.folder').forEach(f => f.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.album-view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+        function changeSection(section, el) {
+            currentSection = section;
+            currentSubFolder = null;
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            render();
         }
 
-        function addNewFolder() {
-            const name = prompt("Enter Folder Name:");
+        function createNewSubFolder() {
+            const name = prompt("Name of the folder inside " + currentSection + ":");
             if (!name) return;
-            const id = name.toLowerCase().replace(/\s/g, '');
-            let folders = JSON.parse(localStorage.getItem('custom_folders') || '[]');
-            folders.push({id, name});
-            localStorage.setItem('custom_folders', JSON.stringify(folders));
-            location.reload();
+            const folderId = "f_" + Date.now();
+            let folders = JSON.parse(localStorage.getItem('sub_folders') || '[]');
+            folders.push({ id: folderId, name: name, parentSection: currentSection });
+            localStorage.setItem('sub_folders', JSON.stringify(folders));
+            render();
         }
 
-        function loadCustomFolders() {
-            let folders = JSON.parse(localStorage.getItem('custom_folders') || '[]');
-            folders.forEach(f => {
-                document.getElementById('folderGrid').innerHTML += `<div class="folder" onclick="openAlbum('${f.id}', this)"><div class="folder-icon">📁</div><div class="folder-name">${f.name}</div></div>`;
-                document.getElementById('albumContainers').innerHTML += `<div id="${f.id}" class="album-view"><div class="photo-container" id="container-${f.id}"></div></div>`;
+        function deleteFolder(id, event) {
+            event.stopPropagation();
+            if(confirm("Delete this folder and everything inside it?")) {
+                // Delete the folder
+                let folders = JSON.parse(localStorage.getItem('sub_folders') || '[]');
+                folders = folders.filter(f => f.id !== id);
+                localStorage.setItem('sub_folders', JSON.stringify(folders));
+
+                // Delete items belonging to that folder
+                let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
+                memories = memories.filter(m => m.subFolder !== id);
+                localStorage.setItem('our_activity', JSON.stringify(memories));
+                
+                render();
+            }
+        }
+
+        function deleteItem(id) {
+            if(confirm("Delete this specific post?")) {
+                let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
+                memories = memories.filter(m => m.id !== id);
+                localStorage.setItem('our_activity', JSON.stringify(memories));
+                render();
+            }
+        }
+
+        function render() {
+            const locationText = document.getElementById('currentLocationText');
+            const subFolderArea = document.getElementById('subFolderArea');
+            const contentArea = document.getElementById('contentArea');
+            const backBtn = document.getElementById('backBtn');
+            
+            subFolderArea.innerHTML = '';
+            contentArea.innerHTML = '';
+
+            if (currentSubFolder) {
+                const folders = JSON.parse(localStorage.getItem('sub_folders') || '[]');
+                const f = folders.find(f => f.id === currentSubFolder);
+                locationText.innerText = "Inside: " + currentSection + " > " + f.name;
+                subFolderArea.classList.add('hidden');
+                backBtn.classList.remove('hidden');
+            } else {
+                locationText.innerText = "Inside: " + currentSection;
+                subFolderArea.classList.remove('hidden');
+                backBtn.classList.add('hidden');
+
+                const folders = JSON.parse(localStorage.getItem('sub_folders') || '[]');
+                folders.filter(f => f.parentSection === currentSection).forEach(f => {
+                    const div = document.createElement('div');
+                    div.className = 'sub-folder';
+                    div.innerHTML = `
+                        <button class="delete-btn" onclick="deleteFolder('${f.id}', event)">×</button>
+                        <div style="font-size:1.5rem">📁</div>
+                        <div style="font-size:0.8rem; font-weight:600">${f.name}</div>`;
+                    div.onclick = () => { currentSubFolder = f.id; render(); };
+                    subFolderArea.appendChild(div);
+                });
+            }
+
+            const memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
+            const filtered = memories.filter(m => m.section === currentSection && m.subFolder === currentSubFolder);
+            
+            filtered.reverse().forEach(data => {
+                const item = document.createElement('div');
+                if (data.type === 'photo') {
+                    item.className = 'polaroid';
+                    item.innerHTML = `
+                        <button class="delete-btn" onclick="deleteItem(${data.id})">×</button>
+                        <img src="${data.src}">
+                        <div class="caption" onclick="editItem(${data.id})">${data.caption || "..."}</div>`;
+                } else {
+                    item.className = 'note';
+                    item.innerHTML = `
+                        <button class="delete-btn" onclick="deleteItem(${data.id})">×</button>
+                        <div onclick="editItem(${data.id})">${data.content}</div>`;
+                }
+                contentArea.appendChild(item);
             });
         }
 
         function postMessage() {
             const val = document.getElementById('messageInput').value;
             if (!val) return;
-            saveMemory({ id: Date.now(), type: 'note', content: val, folder: currentFolder });
+            saveMemory({ id: Date.now(), type: 'note', content: val, section: currentSection, subFolder: currentSubFolder });
             document.getElementById('messageInput').value = "";
         }
 
@@ -235,8 +274,8 @@
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const cap = prompt("Enter a caption:");
-                    saveMemory({ id: Date.now(), type: 'photo', src: e.target.result, caption: cap || "", folder: currentFolder });
+                    const cap = prompt("Caption:");
+                    saveMemory({ id: Date.now(), type: 'photo', src: e.target.result, caption: cap || "", section: currentSection, subFolder: currentSubFolder });
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -246,40 +285,23 @@
             let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
             memories.push(data);
             localStorage.setItem('our_activity', JSON.stringify(memories));
-            displayItem(data);
-        }
-
-        function displayItem(data) {
-            const container = document.getElementById('container-' + data.folder);
-            if (!container) return;
-            const item = document.createElement('div');
-            if (data.type === 'photo') {
-                item.className = 'polaroid';
-                item.innerHTML = `<img src="${data.src}"><div class="caption" onclick="editItem(${data.id})">${data.caption || "Tap to add caption"}</div>`;
-            } else {
-                item.className = 'note';
-                item.innerHTML = `<span onclick="editItem(${data.id})">${data.content}</span>`;
-            }
-            container.prepend(item);
+            render();
         }
 
         function editItem(id) {
             let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
             const idx = memories.findIndex(m => m.id === id);
-            const oldVal = memories[idx].type === 'photo' ? memories[idx].caption : memories[idx].content;
-            const newVal = prompt("Edit your post:", oldVal);
+            const newVal = prompt("Edit content:", memories[idx].type === 'photo' ? memories[idx].caption : memories[idx].content);
             if (newVal !== null) {
                 if (memories[idx].type === 'photo') memories[idx].caption = newVal;
                 else memories[idx].content = newVal;
                 localStorage.setItem('our_activity', JSON.stringify(memories));
-                location.reload();
+                render();
             }
         }
 
-        function loadMemories() {
-            let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
-            memories.forEach(m => displayItem(m));
-        }
+        function exitSubFolder() { currentSubFolder = null; render(); }
+        window.onload = () => { if (localStorage.getItem('isLoggedIn') === 'true') showDashboard(); };
     </script>
 </body>
 </html>
