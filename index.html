@@ -41,21 +41,17 @@
 
         .folder-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 15px; margin-bottom: 30px;
+            gap: 12px; margin-bottom: 30px;
         }
 
         .folder {
             background: var(--folder-bg); padding: 15px 5px; border-radius: 15px;
             text-align: center; cursor: pointer; border: 2px solid white; transition: 0.3s;
-            position: relative;
         }
 
         .folder.active { background: var(--primary-pink); color: white; border-color: var(--primary-pink); }
-        .folder-icon { font-size: 2rem; }
-        .folder-name { font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        
-        .rename-icon { font-size: 0.7rem; opacity: 0.5; cursor: pointer; }
-        .folder.active .rename-icon { filter: brightness(0) invert(1); }
+        .folder-icon { font-size: 1.8rem; }
+        .folder-name { font-size: 0.75rem; font-weight: 600; }
 
         /* --- UPLOAD SECTION --- */
         .upload-controls {
@@ -63,67 +59,39 @@
             padding: 15px; border-radius: 15px; border: 1px dashed var(--primary-pink);
         }
 
-        .custom-file-upload, .post-btn {
+        .btn {
             background: white; color: var(--primary-pink); border: 2px solid var(--primary-pink);
-            padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; display: inline-block;
-            margin: 5px; font-family: 'Quicksand', sans-serif;
+            padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; 
+            font-family: 'Quicksand', sans-serif; margin: 5px;
         }
 
         #messageInput {
-            width: 80%; padding: 10px; border-radius: 10px; border: 1px solid var(--primary-pink);
-            margin: 10px 0; font-family: 'Indie Flower', cursive; font-size: 1rem;
+            width: 90%; height: 50px; padding: 10px; border-radius: 10px; 
+            border: 1px solid var(--primary-pink); margin-bottom: 10px;
+            font-family: 'Indie Flower', cursive;
         }
 
         /* --- ALBUMS --- */
         .album-view { display: none; }
         .album-view.active { display: block; animation: fadeIn 0.5s; }
-
-        .photo-container {
-            display: flex; flex-direction: column; align-items: center; gap: 20px;
-        }
+        .photo-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
 
         .polaroid {
-            background: white; padding: 15px 15px 15px 15px; width: 80%; max-width: 350px;
+            background: white; padding: 15px 15px 15px 15px; width: 85%; max-width: 350px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1); border: 1px solid #eee;
         }
 
         .polaroid img { width: 100%; display: block; }
-        .polaroid:nth-child(even), .note:nth-child(even) { transform: rotate(2deg); }
-        .polaroid:nth-child(odd), .note:nth-child(odd) { transform: rotate(-2deg); }
+        .caption, .note { font-family: 'Indie Flower', cursive; cursor: pointer; }
+        .caption { text-align: center; margin-top: 15px; font-size: 1.2rem; }
 
-        .caption {
-            font-family: 'Indie Flower', cursive; text-align: center;
-            margin-top: 15px; font-size: 1.2rem; color: #444; word-wrap: break-word;
-        }
-
-        /* --- POSTED MESSAGE NOTE --- */
         .note {
-            background: #fff9c4; padding: 20px; width: 80%; max-width: 350px;
+            background: #fff9c4; padding: 20px; width: 85%; max-width: 350px;
             box-shadow: 5px 5px 15px rgba(0,0,0,0.05); border-left: 5px solid #fbc02d;
-            font-family: 'Indie Flower', cursive; font-size: 1.3rem; margin-bottom: 10px;
-        }
-
-        /* --- MESSAGE --- */
-        .message-card {
-            background: #fffde7; padding: 1.5rem; border-left: 8px solid #ffd54f;
-            margin-bottom: 25px; font-family: 'Indie Flower', cursive;
-        }
-
-        .message-text {
-            max-height: 4.5em; overflow: hidden; transition: max-height 0.5s ease;
-            line-height: 1.5; font-size: 1.2rem;
-        }
-
-        .message-text.expanded { max-height: 1000px; }
-
-        .read-more-btn {
-            background: none; border: none; color: var(--primary-pink);
-            font-family: 'Quicksand', sans-serif; font-weight: bold;
-            cursor: pointer; padding: 5px 0; margin-top: 10px;
+            font-size: 1.3rem; margin-bottom: 10px; text-align: left;
         }
 
         h2 { font-family: 'Dancing Script', cursive; color: var(--primary-pink); text-align: center; }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -132,76 +100,48 @@
     <div id="gatekeeper">
         <h2 style="margin-top:0">For My Love</h2>
         <input type="password" id="passInput" placeholder="MMDDYY">
-        <button onclick="checkPassword()" style="background:var(--primary-pink); color:white; border:none; padding:15px; border-radius:10px; width:100%; cursor:pointer;">Open Letter</button>
+        <button onclick="checkPassword()" class="btn" style="background:var(--primary-pink); color:white; width:100%">Open Letter</button>
     </div>
 
     <div id="dashboard">
-        <h2>Memories</h2>
+        <h2>Our Drive</h2>
         
-        <div class="folder-grid">
-            <div class="folder active" onclick="openAlbum('birthday', this)">
-                <div class="folder-icon">🌸</div>
-                <div class="folder-name">
-                    <span id="title-birthday">Birthday</span>
-                    <span class="rename-icon" onclick="renameFolder(event, 'birthday')">✏️</span>
-                </div>
-            </div>
-            <div class="folder" onclick="openAlbum('monthsary', this)">
-                <div class="folder-icon">💖</div>
-                <div class="folder-name">
-                    <span id="title-monthsary">Monthsary</span>
-                    <span class="rename-icon" onclick="renameFolder(event, 'monthsary')">✏️</span>
-                </div>
-            </div>
-            <div class="folder" onclick="openAlbum('roblox', this)">
-                <div class="folder-icon">🎮</div>
-                <div class="folder-name">
-                    <span id="title-roblox">Roblox</span>
-                    <span class="rename-icon" onclick="renameFolder(event, 'roblox')">✏️</span>
-                </div>
-            </div>
+        <div class="folder-grid" id="folderGrid">
+            <div class="folder active" onclick="openAlbum('birthday', this)"><div class="folder-icon">🎂</div><div class="folder-name">Birthday</div></div>
+            <div class="folder" onclick="openAlbum('monthsary', this)"><div class="folder-icon">💖</div><div class="folder-name">Monthsary</div></div>
+            <div class="folder" onclick="openAlbum('everyday', this)"><div class="folder-icon">☀️</div><div class="folder-name">Everyday</div></div>
+            <div class="folder" onclick="openAlbum('schedules', this)"><div class="folder-icon">📅</div><div class="folder-name">Schedules</div></div>
+            <div class="folder" onclick="openAlbum('roblox', this)"><div class="folder-icon">🎮</div><div class="folder-name">Roblox</div></div>
         </div>
 
         <div class="upload-controls">
-            <textarea id="messageInput" placeholder="Write a message to post..."></textarea><br>
-            <button class="post-btn" onclick="postMessage()">📝 Post Message</button>
-            <label class="custom-file-upload">
+            <button class="btn" onclick="addNewFolder()">📁 + Folder</button>
+            <textarea id="messageInput" placeholder="Type a message or schedule here..."></textarea><br>
+            <button class="btn" onclick="postMessage()">📝 Post Text</button>
+            <label class="btn">
                 <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleUpload(this)">
                 ✨ Upload Photo
             </label>
-            <button onclick="clearMemories()" style="display:block; margin: 10px auto; background:none; border:none; color: #999; font-size:0.7rem; cursor:pointer;">Clear All Activity</button>
         </div>
 
-        <div id="birthday" class="album-view active">
-            <div class="message-card">
-                <h3 style="margin-top:0; color:#fbc02d; font-family:'Dancing Script'">A Note for You 💌</h3>
-                <div id="msgText" class="message-text">
-                    "Happy 29th Birthday to the love of my life! I’m so sorry that all I can give you right now is this greeting; I know I’ve been incredibly busy lately, but I want you to know how much I appreciate your constant understanding. Your kindness and patience mean the world to me.<br><br>
-                    It’s your birthday, yet I feel like I’m the one receiving the gift because having you in my life is the greatest present I could ever ask for. I know life will bring challenges, but I truly believe we can overcome anything together. I can’t wait to see you soon and hold you close. Happy Birthday, my baby!"
-                </div>
-                <button onclick="toggleMessage()" id="toggleBtn" class="read-more-btn">Read More ↓</button>
-            </div>
-            <div class="photo-container" id="container-birthday"></div>
+        <div id="albumContainers">
+            <div id="birthday" class="album-view active"><div class="photo-container" id="container-birthday"></div></div>
+            <div id="monthsary" class="album-view"><div class="photo-container" id="container-monthsary"></div></div>
+            <div id="everyday" class="album-view"><div class="photo-container" id="container-everyday"></div></div>
+            <div id="schedules" class="album-view"><div class="photo-container" id="container-schedules"></div></div>
+            <div id="roblox" class="album-view"><div class="photo-container" id="container-roblox"></div></div>
         </div>
 
-        <div id="monthsary" class="album-view">
-            <div class="photo-container" id="container-monthsary"></div>
-        </div>
-
-        <div id="roblox" class="album-view">
-            <div class="photo-container" id="container-roblox"></div>
-        </div>
+        <button onclick="clearAll()" style="display:block; margin: 40px auto; background:none; border:none; color: #999; font-size:0.7rem; cursor:pointer;">Reset Memory Drive</button>
     </div>
 
     <script>
         let currentFolder = 'birthday';
 
         window.onload = function() {
-            // Check if user was already logged in
-            if (localStorage.getItem('isLoggedIn') === 'true') {
-                showDashboard();
-            }
-            loadSavedMemories();
+            if (localStorage.getItem('isLoggedIn') === 'true') showDashboard();
+            loadCustomFolders();
+            loadMemories();
         };
 
         function checkPassword() {
@@ -212,10 +152,9 @@
         }
 
         function showDashboard() {
-            document.body.classList.add('unlocked');
-            if(document.getElementById('gatekeeper')) document.getElementById('gatekeeper').remove();
+            document.getElementById('gatekeeper').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            setTimeout(() => { document.getElementById('dashboard').style.opacity = '1'; }, 50);
+            setTimeout(() => document.getElementById('dashboard').style.opacity = '1', 50);
         }
 
         function openAlbum(id, btn) {
@@ -226,75 +165,87 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function renameFolder(event, id) {
-            event.stopPropagation();
-            const newName = prompt("Enter a new name for this folder:");
-            if (newName) {
-                document.getElementById('title-' + id).innerText = newName;
-            }
+        function addNewFolder() {
+            const name = prompt("Folder Name:");
+            if (!name) return;
+            const id = name.toLowerCase().replace(/\s/g, '');
+            
+            // Save folder info
+            let folders = JSON.parse(localStorage.getItem('custom_folders') || '[]');
+            folders.push({id, name});
+            localStorage.setItem('custom_folders', JSON.stringify(folders));
+            location.reload();
         }
 
-        function toggleMessage() {
-            const text = document.getElementById('msgText');
-            const btn = document.getElementById('toggleBtn');
-            if (text.classList.contains('expanded')) {
-                text.classList.remove('expanded');
-                btn.innerText = "Read More ↓";
-            } else {
-                text.classList.add('expanded');
-                btn.innerText = "Show Less ↑";
-            }
+        function loadCustomFolders() {
+            let folders = JSON.parse(localStorage.getItem('custom_folders') || '[]');
+            folders.forEach(f => {
+                const grid = document.getElementById('folderGrid');
+                const cont = document.getElementById('albumContainers');
+                grid.innerHTML += `<div class="folder" onclick="openAlbum('${f.id}', this)"><div class="folder-icon">📁</div><div class="folder-name">${f.name}</div></div>`;
+                cont.innerHTML += `<div id="${f.id}" class="album-view"><div class="photo-container" id="container-${f.id}"></div></div>`;
+            });
         }
 
         function postMessage() {
-            const text = document.getElementById('messageInput').value;
-            if (!text) return;
-            const data = { type: 'note', content: text, folder: currentFolder };
-            saveMemory(data);
-            displayMemory(data);
+            const val = document.getElementById('messageInput').value;
+            if (!val) return;
+            saveAndDisplay({ id: Date.now(), type: 'note', content: val, folder: currentFolder });
             document.getElementById('messageInput').value = "";
         }
 
         function handleUpload(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const captionText = prompt("Enter a caption for this memory:");
-                    const data = { type: 'photo', src: e.target.result, caption: captionText || "", folder: currentFolder };
-                    saveMemory(data);
-                    displayMemory(data);
+                reader.onload = (e) => {
+                    const cap = prompt("Caption:");
+                    saveAndDisplay({ id: Date.now(), type: 'photo', src: e.target.result, caption: cap || "", folder: currentFolder });
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function displayMemory(data) {
+        function saveAndDisplay(data) {
+            let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
+            memories.push(data);
+            localStorage.setItem('our_activity', JSON.stringify(memories));
+            displayItem(data);
+        }
+
+        function displayItem(data) {
             const container = document.getElementById('container-' + data.folder);
+            if (!container) return;
             const item = document.createElement('div');
             if (data.type === 'photo') {
                 item.className = 'polaroid';
-                item.innerHTML = `<img src="${data.src}"><div class="caption">${data.caption}</div>`;
+                item.innerHTML = `<img src="${data.src}"><div class="caption" onclick="editItem(${data.id})">${data.caption || "..." }</div>`;
             } else {
                 item.className = 'note';
-                item.innerText = data.content;
+                item.innerHTML = `<span onclick="editItem(${data.id})">${data.content}</span>`;
             }
             container.prepend(item);
         }
 
-        function saveMemory(data) {
+        function editItem(id) {
             let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
-            memories.push(data);
-            localStorage.setItem('our_activity', JSON.stringify(memories));
+            const idx = memories.findIndex(m => m.id === id);
+            const newVal = prompt("Edit content:", memories[idx].type === 'photo' ? memories[idx].caption : memories[idx].content);
+            if (newVal !== null) {
+                if (memories[idx].type === 'photo') memories[idx].caption = newVal;
+                else memories[idx].content = newVal;
+                localStorage.setItem('our_activity', JSON.stringify(memories));
+                location.reload();
+            }
         }
 
-        function loadSavedMemories() {
+        function loadMemories() {
             let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
-            memories.forEach(m => displayMemory(m));
+            memories.forEach(m => displayItem(m));
         }
 
-        function clearMemories() {
-            if(confirm("Clear all your posts and photos?")) {
-                localStorage.removeItem('our_activity');
+        function clearAll() {
+            if(confirm("This will delete ALL folders and photos. Continue?")) {
+                localStorage.clear();
                 location.reload();
             }
         }
