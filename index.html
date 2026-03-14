@@ -22,7 +22,6 @@
             display: flex; justify-content: center; min-height: 100vh;
         }
 
-        /* --- PASSWORD GATE --- */
         #gatekeeper {
             align-self: center; text-align: center; background: white; padding: 2.5rem; border-radius: 20px;
             box-shadow: 0 10px 50px rgba(0,0,0,0.1); border: 6px double var(--primary-pink);
@@ -34,7 +33,6 @@
             width: 80%; margin-bottom: 1.5rem; text-align: center; outline: none; font-size: 1rem;
         }
 
-        /* --- DASHBOARD --- */
         #dashboard { 
             display: none; width: 100%; max-width: 1200px; margin: 0 auto; 
             padding: 20px; box-sizing: border-box; opacity: 0; transition: 0.5s; 
@@ -83,7 +81,6 @@
             cursor: pointer; display: flex; align-items: center; justify-content: center;
             opacity: 0.6; transition: 0.3s; z-index: 10;
         }
-        .delete-btn:hover { opacity: 1; transform: scale(1.1); }
 
         .upload-controls {
             text-align: center; margin-bottom: 40px; background: white;
@@ -115,10 +112,11 @@
         }
         .polaroid:hover { transform: scale(1.02); }
 
-        .polaroid img { 
+        .polaroid img, .polaroid video { 
             width: 100%; max-height: 350px; object-fit: contain; background: #f9f9f9; border-radius: 2px; 
-            cursor: zoom-in;
         }
+
+        .caption { font-family: 'Indie Flower', cursive; text-align: center; margin-top: 15px; font-size: 1.2rem; cursor: pointer; }
 
         .note {
             background: white; padding: 25px; width: 100%; max-width: 320px;
@@ -131,14 +129,14 @@
         h3 { color: var(--primary-pink); text-align: center; font-size: 1.4rem; margin-top: 0; text-transform: capitalize; }
         .hidden { display: none !important; }
 
-        /* --- LIGHTBOX (IMAGE VIEWER) --- */
+        /* --- LIGHTBOX --- */
         #lightbox {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center;
-            flex-direction: column; cursor: zoom-out;
+            flex-direction: column;
         }
-        #lightbox img { max-width: 90%; max-height: 80%; border: 5px solid white; border-radius: 5px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        #lightbox-caption { color: white; margin-top: 20px; font-family: 'Indie Flower', cursive; font-size: 1.8rem; text-align: center; width: 80%; }
+        #lightbox-content { max-width: 90%; max-height: 80%; border: 5px solid white; border-radius: 5px; box-shadow: 0 0 30px rgba(0,0,0,0.5); background: #000; }
+        #lightbox-caption { color: white; margin-top: 20px; font-family: 'Indie Flower', cursive; font-size: 1.8rem; text-align: center; }
         .close-lightbox { position: absolute; top: 20px; right: 30px; color: white; font-size: 3rem; cursor: pointer; }
 
     </style>
@@ -171,8 +169,8 @@
             <textarea id="messageInput" placeholder="Write a message..."></textarea><br>
             <button class="btn" onclick="postMessage()">📝 Post Text</button>
             <label class="btn">
-                <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleUpload(this)">
-                ✨ Upload Photo
+                <input type="file" id="mediaInput" accept="image/*,video/*" style="display:none;" onchange="handleUpload(this)">
+                ✨ Upload Photo/Video
             </label>
             <button class="btn" onclick="createNewSubFolder()" style="border-style: dashed;">📁 + New Folder</button>
         </div>
@@ -183,9 +181,9 @@
         <div id="contentArea" class="photo-container"></div>
     </div>
 
-    <div id="lightbox" onclick="closeLightbox()">
-        <span class="close-lightbox">&times;</span>
-        <img id="lightbox-img" src="">
+    <div id="lightbox">
+        <span class="close-lightbox" onclick="closeLightbox()">&times;</span>
+        <div id="lightbox-media-container" style="display:contents;"></div>
         <div id="lightbox-caption"></div>
     </div>
 
@@ -200,10 +198,7 @@
             } else { alert("Try again, love!"); }
         }
 
-        function logout() {
-            localStorage.removeItem('isLoggedIn');
-            location.reload();
-        }
+        function logout() { localStorage.removeItem('isLoggedIn'); location.reload(); }
 
         function showDashboard() {
             document.getElementById('gatekeeper').style.display = 'none';
@@ -220,16 +215,24 @@
             render();
         }
 
-        // --- VIEWER FUNCTIONS ---
-        function openLightbox(src, caption) {
+        function openLightbox(src, caption, type) {
             const lb = document.getElementById('lightbox');
-            document.getElementById('lightbox-img').src = src;
+            const container = document.getElementById('lightbox-media-container');
+            container.innerHTML = '';
+            
+            if (type === 'video') {
+                container.innerHTML = `<video id="lightbox-content" src="${src}" controls autoplay></video>`;
+            } else {
+                container.innerHTML = `<img id="lightbox-content" src="${src}">`;
+            }
+            
             document.getElementById('lightbox-caption').innerText = caption || "";
             lb.style.display = 'flex';
         }
 
         function closeLightbox() {
             document.getElementById('lightbox').style.display = 'none';
+            document.getElementById('lightbox-media-container').innerHTML = ''; // Stop video playback
         }
 
         function render() {
@@ -256,10 +259,9 @@
                 folders.filter(f => f.parentSection === currentSection).forEach(f => {
                     const div = document.createElement('div');
                     div.className = 'sub-folder';
-                    div.innerHTML = `
-                        <button class="delete-btn" onclick="deleteFolder('${f.id}', event)">×</button>
-                        <div style="font-size:1.5rem">📁</div>
-                        <div style="font-size:0.8rem; font-weight:600">${f.name}</div>`;
+                    div.innerHTML = `<button class="delete-btn" onclick="deleteFolder('${f.id}', event)">×</button>
+                                     <div style="font-size:1.5rem">📁</div>
+                                     <div style="font-size:0.8rem; font-weight:600">${f.name}</div>`;
                     div.onclick = () => { currentSubFolder = f.id; render(); };
                     subFolderArea.appendChild(div);
                 });
@@ -270,11 +272,15 @@
             
             filtered.reverse().forEach(data => {
                 const item = document.createElement('div');
-                if (data.type === 'photo') {
+                if (data.type === 'photo' || data.type === 'video') {
                     item.className = 'polaroid';
+                    let mediaHtml = data.type === 'photo' 
+                        ? `<img src="${data.src}" onclick="openLightbox('${data.src}', '${data.caption || ""}', 'photo')">`
+                        : `<video src="${data.src}" onclick="openLightbox('${data.src}', '${data.caption || ""}', 'video')" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>`;
+                    
                     item.innerHTML = `
                         <button class="delete-btn" onclick="deleteItem(${data.id})">×</button>
-                        <img src="${data.src}" onclick="openLightbox('${data.src}', '${data.caption || ""}')">
+                        ${mediaHtml}
                         <div class="caption" onclick="editItem(${data.id})">${data.caption || "Click to add caption"}</div>`;
                 } else {
                     item.className = 'note';
@@ -295,12 +301,14 @@
 
         function handleUpload(input) {
             if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const type = file.type.startsWith('video') ? 'video' : 'photo';
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const cap = prompt("Caption:");
-                    saveMemory({ id: Date.now(), type: 'photo', src: e.target.result, caption: cap || "", section: currentSection, subFolder: currentSubFolder });
+                    saveMemory({ id: Date.now(), type: type, src: e.target.result, caption: cap || "", section: currentSection, subFolder: currentSubFolder });
                 };
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
         }
 
@@ -317,8 +325,12 @@
         function saveMemory(data) {
             let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
             memories.push(data);
-            localStorage.setItem('our_activity', JSON.stringify(memories));
-            render();
+            try {
+                localStorage.setItem('our_activity', JSON.stringify(memories));
+                render();
+            } catch (e) {
+                alert("The memory is too large to save here! Try a smaller video or photo.");
+            }
         }
 
         function deleteItem(id) {
@@ -346,20 +358,17 @@
         function editItem(id) {
             let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
             const idx = memories.findIndex(m => m.id === id);
-            const newVal = prompt("Edit:", memories[idx].type === 'photo' ? memories[idx].caption : memories[idx].content);
+            const newVal = prompt("Edit:", memories[idx].type === 'note' ? memories[idx].content : memories[idx].caption);
             if (newVal !== null) {
-                if (memories[idx].type === 'photo') memories[idx].caption = newVal;
-                else memories[idx].content = newVal;
+                if (memories[idx].type === 'note') memories[idx].content = newVal;
+                else memories[idx].caption = newVal;
                 localStorage.setItem('our_activity', JSON.stringify(memories));
                 render();
             }
         }
 
         function exitSubFolder() { currentSubFolder = null; render(); }
-
-        window.onload = () => { 
-            if (localStorage.getItem('isLoggedIn') === 'true') showDashboard(); 
-        };
+        window.onload = () => { if (localStorage.getItem('isLoggedIn') === 'true') showDashboard(); };
     </script>
 </body>
 </html>
