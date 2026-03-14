@@ -28,6 +28,11 @@
             max-width: 350px; width: 90%;
         }
 
+        input[type="password"] {
+            padding: 12px; border-radius: 10px; border: 2px solid var(--primary-pink);
+            width: 80%; margin-bottom: 1.5rem; text-align: center;
+        }
+
         #dashboard { 
             display: none; width: 100%; max-width: 1200px; margin: 0 auto; 
             padding: 40px 20px; box-sizing: border-box; opacity: 0; transition: 1s; 
@@ -52,7 +57,6 @@
             background: rgba(255,255,255,0.3); border-radius: 20px;
         }
 
-        /* --- UPDATED FOLDER STYLE WITH DELETE --- */
         .sub-folder {
             background: white; padding: 15px; border-radius: 12px;
             text-align: center; cursor: pointer; border-bottom: 4px solid var(--folder-color);
@@ -92,10 +96,17 @@
             gap: 25px; justify-items: center; margin-top: 30px;
         }
 
-        /* --- UPDATED POST STYLE WITH DELETE --- */
+        /* --- POLAROID STYLE WITH SIZE LIMIT --- */
         .polaroid {
-            background: white; padding: 12px 12px 18px 12px; width: 100%; max-width: 300px;
+            background: white; padding: 12px 12px 18px 12px; width: 100%; max-width: 300px; /* limits width */
             box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-radius: 2px; position: relative;
+        }
+
+        .polaroid img { 
+            width: 100%; /* fills the container */
+            max-height: 400px; /* prevents excessive height */
+            object-fit: cover; /* keeps proportion */
+            border-radius: 2px; 
         }
 
         .note {
@@ -186,12 +197,10 @@
         function deleteFolder(id, event) {
             event.stopPropagation();
             if(confirm("Delete this folder and everything inside it?")) {
-                // Delete the folder
                 let folders = JSON.parse(localStorage.getItem('sub_folders') || '[]');
                 folders = folders.filter(f => f.id !== id);
                 localStorage.setItem('sub_folders', JSON.stringify(folders));
 
-                // Delete items belonging to that folder
                 let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
                 memories = memories.filter(m => m.subFolder !== id);
                 localStorage.setItem('our_activity', JSON.stringify(memories));
