@@ -77,13 +77,23 @@
         }
 
         .polaroid {
-            background: white; padding: 15px 15px 40px 15px; width: 80%; max-width: 350px;
+            background: white; padding: 15px 15px 15px 15px; width: 80%; max-width: 350px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1); border: 1px solid #eee;
+            margin-bottom: 10px;
         }
 
         .polaroid img { width: 100%; display: block; }
         .polaroid:nth-child(even) { transform: rotate(2deg); }
         .polaroid:nth-child(odd) { transform: rotate(-2deg); }
+
+        .caption {
+            font-family: 'Indie Flower', cursive;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.2rem;
+            color: #444;
+            word-wrap: break-word;
+        }
 
         /* --- MESSAGE --- */
         .message-card {
@@ -150,6 +160,7 @@
                 <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleUpload(this)">
                 ✨ Upload Photo
             </label>
+            <button onclick="clearMemories()" style="display:block; margin: 10px auto; background:none; border:none; color: #999; font-size:0.7rem; cursor:pointer;">Clear Uploaded Memories</button>
         </div>
 
         <div id="birthday" class="album-view active">
@@ -162,25 +173,30 @@
                 <button onclick="toggleMessage()" id="toggleBtn" class="read-more-btn">Read More ↓</button>
             </div>
             <div class="photo-container" id="container-birthday">
-                <div class="polaroid"><img src="https://i.imgur.com/kmXZdMD.png"></div>
+                <div class="polaroid"><img src="https://i.imgur.com/kmXZdMD.png"><div class="caption">Default Birthday Memory</div></div>
             </div>
         </div>
 
         <div id="monthsary" class="album-view">
             <div class="photo-container" id="container-monthsary">
-                <div class="polaroid"><img src="https://i.imgur.com/YNpKxsc.png"></div>
+                <div class="polaroid"><img src="https://i.imgur.com/YNpKxsc.png"><div class="caption">Default Monthsary Memory</div></div>
             </div>
         </div>
 
         <div id="roblox" class="album-view">
             <div class="photo-container" id="container-roblox">
-                <div class="polaroid"><img src="https://i.imgur.com/Y8xLDuq.png"></div>
+                <div class="polaroid"><img src="https://i.imgur.com/Y8xLDuq.png"><div class="caption">Default Roblox Memory</div></div>
             </div>
         </div>
     </div>
 
     <script>
         let currentFolder = 'birthday';
+
+        // Load saved photos on startup
+        window.onload = function() {
+            loadSavedPhotos();
+        };
 
         function checkPassword() {
             if (document.getElementById('passInput').value === "022797") {
@@ -200,7 +216,7 @@
         }
 
         function renameFolder(event, id) {
-            event.stopPropagation(); // Prevents opening the folder when clicking rename
+            event.stopPropagation();
             const newName = prompt("Enter a new name for this folder:");
             if (newName) {
                 document.getElementById('title-' + id).innerText = newName;
@@ -223,13 +239,43 @@
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const container = document.getElementById('container-' + currentFolder);
-                    const newPolaroid = document.createElement('div');
-                    newPolaroid.className = 'polaroid';
-                    newPolaroid.innerHTML = `<img src="${e.target.result}">`;
-                    container.prepend(newPolaroid);
+                    const captionText = prompt("Enter a caption for this memory:");
+                    const photoData = {
+                        src: e.target.result,
+                        caption: captionText || "",
+                        folder: currentFolder
+                    };
+                    
+                    savePhoto(photoData);
+                    displayPhoto(photoData);
                 };
                 reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function displayPhoto(data) {
+            const container = document.getElementById('container-' + data.folder);
+            const newPolaroid = document.createElement('div');
+            newPolaroid.className = 'polaroid';
+            newPolaroid.innerHTML = `<img src="${data.src}"><div class="caption">${data.caption}</div>`;
+            container.prepend(newPolaroid);
+        }
+
+        function savePhoto(data) {
+            let photos = JSON.parse(localStorage.getItem('our_memories') || '[]');
+            photos.push(data);
+            localStorage.setItem('our_memories', JSON.stringify(photos));
+        }
+
+        function loadSavedPhotos() {
+            let photos = JSON.parse(localStorage.getItem('our_memories') || '[]');
+            photos.forEach(photo => displayPhoto(photo));
+        }
+
+        function clearMemories() {
+            if(confirm("Are you sure you want to clear all uploaded photos?")) {
+                localStorage.removeItem('our_memories');
+                location.reload();
             }
         }
     </script>
