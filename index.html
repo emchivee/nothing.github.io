@@ -129,7 +129,6 @@
         h3 { color: var(--primary-pink); text-align: center; font-size: 1.4rem; margin-top: 0; text-transform: capitalize; }
         .hidden { display: none !important; }
 
-        /* --- LIGHTBOX --- */
         #lightbox {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center;
@@ -138,7 +137,6 @@
         #lightbox-content { max-width: 90%; max-height: 80%; border: 5px solid white; border-radius: 5px; box-shadow: 0 0 30px rgba(0,0,0,0.5); background: #000; }
         #lightbox-caption { color: white; margin-top: 20px; font-family: 'Indie Flower', cursive; font-size: 1.8rem; text-align: center; }
         .close-lightbox { position: absolute; top: 20px; right: 30px; color: white; font-size: 3rem; cursor: pointer; }
-
     </style>
 </head>
 <body>
@@ -190,6 +188,16 @@
     <script>
         let currentSection = 'birthday';
         let currentSubFolder = null;
+        let db;
+
+        // --- DATABASE SETUP (IndexedDB for Large Videos) ---
+        const request = indexedDB.open("MemoryDriveDB", 1);
+        request.onupgradeneeded = e => {
+            db = e.target.result;
+            db.createObjectStore("memories", { keyPath: "id" });
+            db.createObjectStore("folders", { keyPath: "id" });
+        };
+        request.onsuccess = e => { db = e.target.result; if(localStorage.getItem('isLoggedIn') === 'true') showDashboard(); };
 
         function checkPassword() {
             if (document.getElementById('passInput').value === "022797") {
@@ -208,54 +216,43 @@
         }
 
         function changeSection(section, el) {
-            currentSection = section;
-            currentSubFolder = null;
+            currentSection = section; currentSubFolder = null;
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-            render();
+            el.classList.add('active'); render();
         }
 
         function openLightbox(src, caption, type) {
             const lb = document.getElementById('lightbox');
             const container = document.getElementById('lightbox-media-container');
-            container.innerHTML = '';
-            
-            if (type === 'video') {
-                container.innerHTML = `<video id="lightbox-content" src="${src}" controls autoplay></video>`;
-            } else {
-                container.innerHTML = `<img id="lightbox-content" src="${src}">`;
-            }
-            
+            container.innerHTML = type === 'video' 
+                ? `<video id="lightbox-content" src="${src}" controls autoplay></video>`
+                : `<img id="lightbox-content" src="${src}">`;
             document.getElementById('lightbox-caption').innerText = caption || "";
             lb.style.display = 'flex';
         }
 
         function closeLightbox() {
             document.getElementById('lightbox').style.display = 'none';
-            document.getElementById('lightbox-media-container').innerHTML = ''; // Stop video playback
+            document.getElementById('lightbox-media-container').innerHTML = '';
         }
 
-        function render() {
+        async function render() {
             const locationText = document.getElementById('currentLocationText');
             const subFolderArea = document.getElementById('subFolderArea');
             const contentArea = document.getElementById('contentArea');
             const backBtn = document.getElementById('backBtn');
-            
-            subFolderArea.innerHTML = '';
-            contentArea.innerHTML = '';
+            subFolderArea.innerHTML = ''; contentArea.innerHTML = '';
+
+            const folders = await getAllFromStore("folders");
+            const memories = await getAllFromStore("memories");
 
             if (currentSubFolder) {
-                const folders = JSON.parse(localStorage.getItem('sub_folders') || '[]');
                 const f = folders.find(f => f.id === currentSubFolder);
                 locationText.innerText = currentSection + " > " + (f ? f.name : '');
-                subFolderArea.classList.add('hidden');
-                backBtn.classList.remove('hidden');
+                subFolderArea.classList.add('hidden'); backBtn.classList.remove('hidden');
             } else {
                 locationText.innerText = currentSection;
-                subFolderArea.classList.remove('hidden');
-                backBtn.classList.add('hidden');
-
-                const folders = JSON.parse(localStorage.getItem('sub_folders') || '[]');
+                subFolderArea.classList.remove('hidden'); backBtn.classList.add('hidden');
                 folders.filter(f => f.parentSection === currentSection).forEach(f => {
                     const div = document.createElement('div');
                     div.className = 'sub-folder';
@@ -267,9 +264,7 @@
                 });
             }
 
-            const memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
             const filtered = memories.filter(m => m.section === currentSection && m.subFolder === currentSubFolder);
-            
             filtered.reverse().forEach(data => {
                 const item = document.createElement('div');
                 if (data.type === 'photo' || data.type === 'video') {
@@ -277,16 +272,11 @@
                     let mediaHtml = data.type === 'photo' 
                         ? `<img src="${data.src}" onclick="openLightbox('${data.src}', '${data.caption || ""}', 'photo')">`
                         : `<video src="${data.src}" onclick="openLightbox('${data.src}', '${data.caption || ""}', 'video')" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>`;
-                    
-                    item.innerHTML = `
-                        <button class="delete-btn" onclick="deleteItem(${data.id})">×</button>
-                        ${mediaHtml}
+                    item.innerHTML = `<button class="delete-btn" onclick="deleteItem(${data.id})">×</button>${mediaHtml}
                         <div class="caption" onclick="editItem(${data.id})">${data.caption || "Click to add caption"}</div>`;
                 } else {
                     item.className = 'note';
-                    item.innerHTML = `
-                        <button class="delete-btn" onclick="deleteItem(${data.id})">×</button>
-                        <div onclick="editItem(${data.id})">${data.content}</div>`;
+                    item.innerHTML = `<button class="delete-btn" onclick="deleteItem(${data.id})">×</button><div onclick="editItem(${data.id})">${data.content}</div>`;
                 }
                 contentArea.appendChild(item);
             });
@@ -295,7 +285,7 @@
         function postMessage() {
             const val = document.getElementById('messageInput').value;
             if (!val) return;
-            saveMemory({ id: Date.now(), type: 'note', content: val, section: currentSection, subFolder: currentSubFolder });
+            saveToStore("memories", { id: Date.now(), type: 'note', content: val, section: currentSection, subFolder: currentSubFolder });
             document.getElementById('messageInput').value = "";
         }
 
@@ -306,7 +296,7 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const cap = prompt("Caption:");
-                    saveMemory({ id: Date.now(), type: type, src: e.target.result, caption: cap || "", section: currentSection, subFolder: currentSubFolder });
+                    saveToStore("memories", { id: Date.now(), type: type, src: e.target.result, caption: cap || "", section: currentSection, subFolder: currentSubFolder });
                 };
                 reader.readAsDataURL(file);
             }
@@ -315,60 +305,61 @@
         function createNewSubFolder() {
             const name = prompt("Folder Name:");
             if (!name) return;
-            const folderId = "f_" + Date.now();
-            let folders = JSON.parse(localStorage.getItem('sub_folders') || '[]');
-            folders.push({ id: folderId, name: name, parentSection: currentSection });
-            localStorage.setItem('sub_folders', JSON.stringify(folders));
-            render();
+            saveToStore("folders", { id: "f_" + Date.now(), name: name, parentSection: currentSection });
         }
 
-        function saveMemory(data) {
-            let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
-            memories.push(data);
-            try {
-                localStorage.setItem('our_activity', JSON.stringify(memories));
-                render();
-            } catch (e) {
-                alert("The memory is too large to save here! Try a smaller video or photo.");
-            }
+        // --- DB HELPERS ---
+        function saveToStore(storeName, data) {
+            const tx = db.transaction(storeName, "readwrite");
+            tx.objectStore(storeName).add(data);
+            tx.oncomplete = () => render();
+        }
+
+        function getAllFromStore(storeName) {
+            return new Promise(resolve => {
+                const tx = db.transaction(storeName, "readonly");
+                const request = tx.objectStore(storeName).getAll();
+                request.onsuccess = () => resolve(request.result);
+            });
         }
 
         function deleteItem(id) {
             if(confirm("Delete this post?")) {
-                let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
-                memories = memories.filter(m => m.id !== id);
-                localStorage.setItem('our_activity', JSON.stringify(memories));
-                render();
+                const tx = db.transaction("memories", "readwrite");
+                tx.objectStore("memories").delete(id);
+                tx.oncomplete = () => render();
             }
         }
 
-        function deleteFolder(id, event) {
+        async function deleteFolder(id, event) {
             event.stopPropagation();
             if(confirm("Delete this folder and its contents?")) {
-                let folders = JSON.parse(localStorage.getItem('sub_folders') || '[]');
-                folders = folders.filter(f => f.id !== id);
-                localStorage.setItem('sub_folders', JSON.stringify(folders));
-                let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
-                memories = memories.filter(m => m.subFolder !== id);
-                localStorage.setItem('our_activity', JSON.stringify(memories));
-                render();
+                const txF = db.transaction("folders", "readwrite");
+                txF.objectStore("folders").delete(id);
+                const memories = await getAllFromStore("memories");
+                const txM = db.transaction("memories", "readwrite");
+                const mStore = txM.objectStore("memories");
+                memories.filter(m => m.subFolder === id).forEach(m => mStore.delete(m.id));
+                txM.oncomplete = () => render();
             }
         }
 
-        function editItem(id) {
-            let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
-            const idx = memories.findIndex(m => m.id === id);
-            const newVal = prompt("Edit:", memories[idx].type === 'note' ? memories[idx].content : memories[idx].caption);
-            if (newVal !== null) {
-                if (memories[idx].type === 'note') memories[idx].content = newVal;
-                else memories[idx].caption = newVal;
-                localStorage.setItem('our_activity', JSON.stringify(memories));
-                render();
-            }
+        async function editItem(id) {
+            const tx = db.transaction("memories", "readwrite");
+            const store = tx.objectStore("memories");
+            const request = store.get(id);
+            request.onsuccess = () => {
+                const data = request.result;
+                const newVal = prompt("Edit:", data.type === 'note' ? data.content : data.caption);
+                if (newVal !== null) {
+                    if (data.type === 'note') data.content = newVal; else data.caption = newVal;
+                    store.put(data);
+                    tx.oncomplete = () => render();
+                }
+            };
         }
 
         function exitSubFolder() { currentSubFolder = null; render(); }
-        window.onload = () => { if (localStorage.getItem('isLoggedIn') === 'true') showDashboard(); };
     </script>
 </body>
 </html>
