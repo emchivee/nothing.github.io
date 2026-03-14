@@ -79,10 +79,11 @@
         .delete-btn {
             position: absolute; top: 5px; right: 5px;
             background: var(--delete-red); color: white; border: none;
-            border-radius: 50%; width: 20px; height: 20px; font-size: 12px;
+            border-radius: 50%; width: 22px; height: 22px; font-size: 14px;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
             opacity: 0.6; transition: 0.3s; z-index: 10;
         }
+        .delete-btn:hover { opacity: 1; transform: scale(1.1); }
 
         .upload-controls {
             text-align: center; margin-bottom: 40px; background: white;
@@ -110,10 +111,13 @@
         .polaroid {
             background: white; padding: 12px 12px 18px 12px; width: 100%; max-width: 300px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-radius: 2px; position: relative;
+            transition: transform 0.3s ease;
         }
+        .polaroid:hover { transform: scale(1.02); }
 
         .polaroid img { 
             width: 100%; max-height: 350px; object-fit: contain; background: #f9f9f9; border-radius: 2px; 
+            cursor: zoom-in;
         }
 
         .note {
@@ -127,6 +131,16 @@
         h3 { color: var(--primary-pink); text-align: center; font-size: 1.4rem; margin-top: 0; text-transform: capitalize; }
         .hidden { display: none !important; }
 
+        /* --- LIGHTBOX (IMAGE VIEWER) --- */
+        #lightbox {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center;
+            flex-direction: column; cursor: zoom-out;
+        }
+        #lightbox img { max-width: 90%; max-height: 80%; border: 5px solid white; border-radius: 5px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        #lightbox-caption { color: white; margin-top: 20px; font-family: 'Indie Flower', cursive; font-size: 1.8rem; text-align: center; width: 80%; }
+        .close-lightbox { position: absolute; top: 20px; right: 30px; color: white; font-size: 3rem; cursor: pointer; }
+
     </style>
 </head>
 <body>
@@ -139,7 +153,8 @@
 
     <div id="dashboard">
         <div class="header-bar">
-            <div style="width:70px"></div> <h2 style="margin:0">Our Memory Drive</h2>
+            <div style="width:70px"></div>
+            <h2 style="margin:0">Our Memory Drive</h2>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
         
@@ -168,11 +183,16 @@
         <div id="contentArea" class="photo-container"></div>
     </div>
 
+    <div id="lightbox" onclick="closeLightbox()">
+        <span class="close-lightbox">&times;</span>
+        <img id="lightbox-img" src="">
+        <div id="lightbox-caption"></div>
+    </div>
+
     <script>
         let currentSection = 'birthday';
         let currentSubFolder = null;
 
-        // Login Logic
         function checkPassword() {
             if (document.getElementById('passInput').value === "022797") {
                 localStorage.setItem('isLoggedIn', 'true');
@@ -192,13 +212,24 @@
             render();
         }
 
-        // Navigation & Rendering
         function changeSection(section, el) {
             currentSection = section;
             currentSubFolder = null;
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
             render();
+        }
+
+        // --- VIEWER FUNCTIONS ---
+        function openLightbox(src, caption) {
+            const lb = document.getElementById('lightbox');
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox-caption').innerText = caption || "";
+            lb.style.display = 'flex';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
         }
 
         function render() {
@@ -243,7 +274,7 @@
                     item.className = 'polaroid';
                     item.innerHTML = `
                         <button class="delete-btn" onclick="deleteItem(${data.id})">×</button>
-                        <img src="${data.src}">
+                        <img src="${data.src}" onclick="openLightbox('${data.src}', '${data.caption || ""}')">
                         <div class="caption" onclick="editItem(${data.id})">${data.caption || "Click to add caption"}</div>`;
                 } else {
                     item.className = 'note';
@@ -255,7 +286,6 @@
             });
         }
 
-        // Post & Folder Management
         function postMessage() {
             const val = document.getElementById('messageInput').value;
             if (!val) return;
