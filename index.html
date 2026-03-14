@@ -30,7 +30,7 @@
 
         input[type="password"] {
             padding: 12px; border-radius: 10px; border: 2px solid var(--primary-pink);
-            width: 80%; margin-bottom: 1.5rem; text-align: center;
+            width: 80%; margin-bottom: 1.5rem; text-align: center; outline: none;
         }
 
         #dashboard { 
@@ -46,7 +46,7 @@
         .nav-item {
             background: var(--glass); padding: 15px; border-radius: 15px;
             text-align: center; cursor: pointer; border: 2px solid white; transition: 0.3s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-weight: 600;
         }
 
         .nav-item.active { background: var(--primary-pink); color: white; border-color: var(--primary-pink); }
@@ -87,8 +87,8 @@
         .btn:hover { background: var(--primary-pink); color: white; }
 
         textarea {
-            width: 100%; max-width: 600px; height: 60px; padding: 12px; border-radius: 12px; 
-            border: 1px solid #ddd; margin-bottom: 10px; outline: none; font-family: inherit;
+            width: 100%; max-width: 600px; height: 70px; padding: 12px; border-radius: 12px; 
+            border: 1px solid #ddd; margin-bottom: 10px; outline: none; font-family: inherit; font-size: 1rem;
         }
 
         .photo-container { 
@@ -96,28 +96,31 @@
             gap: 25px; justify-items: center; margin-top: 30px;
         }
 
-        /* --- POLAROID STYLE WITH SIZE LIMIT --- */
+        /* --- POLAROID STYLE (NORMAL SIZE) --- */
         .polaroid {
-            background: white; padding: 12px 12px 18px 12px; width: 100%; max-width: 300px; /* limits width */
+            background: white; padding: 12px 12px 18px 12px; width: 100%; max-width: 300px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-radius: 2px; position: relative;
         }
 
         .polaroid img { 
-            width: 100%; /* fills the container */
-            max-height: 400px; /* prevents excessive height */
-            object-fit: cover; /* keeps proportion */
+            width: 100%; 
+            max-height: 350px; /* Normal height limit */
+            object-fit: contain; /* Shows full picture without cutting */
+            background: #f9f9f9;
             border-radius: 2px; 
         }
+
+        .caption { font-family: 'Indie Flower', cursive; text-align: center; margin-top: 15px; font-size: 1.2rem; cursor: pointer; }
 
         .note {
             background: white; padding: 25px; width: 100%; max-width: 320px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.05); border-radius: 15px;
             border-left: 5px solid var(--primary-pink); color: #444; line-height: 1.5;
-            position: relative;
+            position: relative; cursor: pointer; font-size: 1.1rem;
         }
 
         h2 { font-family: 'Dancing Script', cursive; color: var(--primary-pink); text-align: center; font-size: 2.5rem; }
-        h3 { color: var(--primary-pink); text-align: center; font-size: 1.2rem; margin-top: 0; }
+        h3 { color: var(--primary-pink); text-align: center; font-size: 1.4rem; margin-top: 0; text-transform: capitalize; }
         .hidden { display: none !important; }
 
     </style>
@@ -142,17 +145,17 @@
         </div>
 
         <div class="upload-controls">
-            <h3 id="currentLocationText">Inside: Birthday</h3>
-            <textarea id="messageInput" placeholder="Post a message or schedule..."></textarea><br>
+            <h3 id="currentLocationText">Birthday</h3>
+            <textarea id="messageInput" placeholder="Write a message..."></textarea><br>
             <button class="btn" onclick="postMessage()">📝 Post Text</button>
             <label class="btn">
                 <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleUpload(this)">
                 ✨ Upload Photo
             </label>
-            <button class="btn" onclick="createNewSubFolder()" style="border-style: dashed;">📁 + New Sub-Folder</button>
+            <button class="btn" onclick="createNewSubFolder()" style="border-style: dashed;">📁 + New Folder</button>
         </div>
 
-        <button id="backBtn" class="btn hidden" onclick="exitSubFolder()" style="margin-bottom:20px;">← Back to Main</button>
+        <button id="backBtn" class="btn hidden" onclick="exitSubFolder()" style="margin-bottom:20px;">← Back</button>
 
         <div id="subFolderArea" class="sub-folder-grid"></div>
         <div id="contentArea" class="photo-container"></div>
@@ -196,7 +199,7 @@
 
         function deleteFolder(id, event) {
             event.stopPropagation();
-            if(confirm("Delete this folder and everything inside it?")) {
+            if(confirm("Delete this folder and everything inside?")) {
                 let folders = JSON.parse(localStorage.getItem('sub_folders') || '[]');
                 folders = folders.filter(f => f.id !== id);
                 localStorage.setItem('sub_folders', JSON.stringify(folders));
@@ -204,13 +207,12 @@
                 let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
                 memories = memories.filter(m => m.subFolder !== id);
                 localStorage.setItem('our_activity', JSON.stringify(memories));
-                
                 render();
             }
         }
 
         function deleteItem(id) {
-            if(confirm("Delete this specific post?")) {
+            if(confirm("Delete this post?")) {
                 let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
                 memories = memories.filter(m => m.id !== id);
                 localStorage.setItem('our_activity', JSON.stringify(memories));
@@ -230,11 +232,11 @@
             if (currentSubFolder) {
                 const folders = JSON.parse(localStorage.getItem('sub_folders') || '[]');
                 const f = folders.find(f => f.id === currentSubFolder);
-                locationText.innerText = "Inside: " + currentSection + " > " + f.name;
+                locationText.innerText = currentSection + " > " + f.name;
                 subFolderArea.classList.add('hidden');
                 backBtn.classList.remove('hidden');
             } else {
-                locationText.innerText = "Inside: " + currentSection;
+                locationText.innerText = currentSection;
                 subFolderArea.classList.remove('hidden');
                 backBtn.classList.add('hidden');
 
@@ -261,7 +263,7 @@
                     item.innerHTML = `
                         <button class="delete-btn" onclick="deleteItem(${data.id})">×</button>
                         <img src="${data.src}">
-                        <div class="caption" onclick="editItem(${data.id})">${data.caption || "..."}</div>`;
+                        <div class="caption" onclick="editItem(${data.id})">${data.caption || "Click to add caption"}</div>`;
                 } else {
                     item.className = 'note';
                     item.innerHTML = `
@@ -300,7 +302,7 @@
         function editItem(id) {
             let memories = JSON.parse(localStorage.getItem('our_activity') || '[]');
             const idx = memories.findIndex(m => m.id === id);
-            const newVal = prompt("Edit content:", memories[idx].type === 'photo' ? memories[idx].caption : memories[idx].content);
+            const newVal = prompt("Edit:", memories[idx].type === 'photo' ? memories[idx].caption : memories[idx].content);
             if (newVal !== null) {
                 if (memories[idx].type === 'photo') memories[idx].caption = newVal;
                 else memories[idx].content = newVal;
